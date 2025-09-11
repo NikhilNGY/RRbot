@@ -45,6 +45,8 @@ BUTTONS2 = {}
 SPELL_CHECK = {}
 # ENABLE_SHORTLINK = ""
 
+SPELL_IMG = "https://envs.sh/P9Q.jpg"
+
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
@@ -1803,6 +1805,8 @@ async def advantage_spell_chok(client, msg):
     mv_id = msg.id
     mv_rqst = msg.text
 
+    SPELL_IMG = "https://envs.sh/P9Q.jpg"
+
     # Only use valid user IDs
     if msg.from_user and msg.from_user.id:
         reqstr1 = msg.from_user.id
@@ -1888,9 +1892,9 @@ async def advantage_spell_chok(client, msg):
         ] for k, movie in enumerate(movielist)]
         btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
         spell_check_del = await msg.reply_photo(
-            photo=(SPELL_IMG),
-            caption=(script.CUDNT_FND.format(mv_rqst)),
-            reply_markup=InlineKeyboardMarkup(btn)
+        photo=SPELL_IMG,  # must be a direct image link ending with .jpg/.png
+        caption=script.CUDNT_FND.format(mv_rqst),
+        reply_markup=InlineKeyboardMarkup(btn)
         )
         try:
             if settings['auto_delete']:
@@ -1926,6 +1930,7 @@ async def advantage_spell_chok(client, msg):
     # 002
     mv_id = msg.id
     mv_rqst = msg.text
+    SPELL_IMG = "https://envs.sh/P9Q.jpg"
 
     # 005 - Helper to send "no results" messages
     async def send_no_result(query_text):
@@ -2017,9 +2022,9 @@ async def advantage_spell_chok(client, msg):
         btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
 
         spell_check_del = await msg.reply_photo(
-            photo=SPELL_IMG,
-            caption=script.CUDNT_FND.format(mv_rqst),
-            reply_markup=InlineKeyboardMarkup(btn)
+        photo=SPELL_IMG,  # must be a direct image link ending with .jpg/.png
+        caption=script.CUDNT_FND.format(mv_rqst),
+        reply_markup=InlineKeyboardMarkup(btn)
         )
 
         # 107 - Auto delete with safe check
@@ -2046,9 +2051,9 @@ async def advantage_spell_chok(client, msg):
         btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
 
         spell_check_del = await msg.reply_photo(
-            photo=SPELL_IMG,
-            caption=script.CUDNT_FND.format(mv_rqst),
-            reply_markup=InlineKeyboardMarkup(btn)
+        photo=SPELL_IMG,  # must be a direct image link ending with .jpg/.png
+        caption=script.CUDNT_FND.format(mv_rqst),
+        reply_markup=InlineKeyboardMarkup(btn)
         )
 
         if settings.get('auto_delete', False):
