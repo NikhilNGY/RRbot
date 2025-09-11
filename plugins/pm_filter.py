@@ -1985,10 +1985,78 @@ async def advantage_spell_chok(client, msg):
         gs_parsed = [
             re.sub(
                 r'\b(\-([a-zA-Z-\s])\-\simdb|(\-\s)?imdb|(\-\s)?wikipedia|\(|\)|\-|reviews|full|all|episode(s)?|film|movie|series)',
+
+async def advantage_spell_chok(client, msg):
+    mv_id = msg.id
+    mv_rqst = msg.text
+
+    # Helper: send "no results" message with spellcheck image
+    async def send_no_result(query_text):
+        reqst_gle = query_text.replace(" ", "+")
+        button = [[
+            InlineKeyboardButton(
+                "•  Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ  •", 
+                url="https://t.me/+zqPEZQq4O3s0NDg1"
+            )
+        ]]
+        if NO_RESULTS_MSG:
+            await client.send_message(
+                chat_id=LOG_CHANNEL, 
+                text=(script.NORSLTS.format(reqstr.id, reqstr.mention, mv_rqst))
+            )
+        # Save image locally if SPELL_IMG is bytes
+        if isinstance(SPELL_IMG, bytes):
+            spell_img_io = BytesIO(SPELL_IMG)
+            spell_img_io.name = "spellcheck.jpg"
+            photo_to_send = spell_img_io
+        else:
+            photo_to_send = SPELL_IMG  # URL or path
+
+        k = await msg.reply_photo(
+            photo=photo_to_send,
+            caption=script.I_CUDNT.format(mv_rqst),
+            reply_markup=InlineKeyboardMarkup(button)
+        )
+        await asyncio.sleep(18000)  # 5 hours
+        await k.delete()
+
+    # Only process valid user IDs
+    if not (msg.from_user and msg.from_user.id):
+        logger.warning(f"Skipping message {mv_id}: no valid user ID")
+        return
+    reqstr1 = msg.from_user.id
+    reqstr = await client.get_users(reqstr1)
+
+    settings = await get_settings(msg.chat.id)
+
+    # Build query string
+    removes = ["in","upload", "series", "full", "horror", "thriller", "mystery", "print", "file"]
+    query = " ".join([x for x in mv_rqst.split(" ") if x not in removes])
+    query = re.sub(
+        r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)",
+        "", query, flags=re.IGNORECASE
+    )
+    query = re.sub(r"\s+", " ", query).strip() + " movie"
+
+    try:
+        # Search movies
+        g_s = await search_gagala(query)
+        g_s += await search_gagala(msg.text)
+
+        if not g_s:
+            await send_no_result(query)
+            return
+
+        regex = re.compile(r".*(imdb|wikipedia).*", re.IGNORECASE)
+        gs = list(filter(regex.match, g_s))
+        gs_parsed = [
+            re.sub(
+                r'\b(\-([a-zA-Z-\s])\-\simdb|(\-\s)?imdb|(\-\s)?wikipedia|\(|\)|\-|reviews|full|all|episode(s)?|film|movie|series)',
                 '', i, flags=re.IGNORECASE
             ) for i in gs
         ]
 
+        # Fallback regex
         if not gs_parsed:
             reg = re.compile(r"watch(\s[a-zA-Z0-9_\s\-\(\)]*)*\|.*", re.IGNORECASE)
             for mv in g_s:
@@ -1996,43 +2064,47 @@ async def advantage_spell_chok(client, msg):
                 if match:
                     gs_parsed.append(match.group(1))
 
+        # Limit results and get posters
+        gs_parsed = list(dict.fromkeys(gs_parsed))[:3]
         movielist = []
-        gs_parsed = list(dict.fromkeys(gs_parsed))  # remove duplicates
-        if len(gs_parsed) > 3:
-            gs_parsed = gs_parsed[:3]
 
-        if gs_parsed:
-            for mov in gs_parsed:
-                imdb_s = await get_poster(mov.strip(), bulk=True)
-                if imdb_s:
-                    movielist += [movie.get('title') for movie in imdb_s]
+        for mov in gs_parsed:
+            imdb_s = await get_poster(mov.strip(), bulk=True)
+            if imdb_s:
+                movielist += [movie.get('title') for movie in imdb_s]
 
-        movielist += [(re.sub(r'(\-|\(|\)|_)', '', i, flags=re.IGNORECASE)).strip() for i in gs_parsed]
+        movielist += [re.sub(r'(\-|\(|\)|_)', '', i).strip() for i in gs_parsed]
         movielist = list(dict.fromkeys(movielist))  # remove duplicates
 
         if not movielist:
             await send_no_result(query)
             return
 
-        # 095 - Send spell check buttons
         SPELL_CHECK[mv_id] = movielist
         btn = [[
             InlineKeyboardButton(text=movie.strip(), callback_data=f"spolling#{reqstr1}#{k}")
         ] for k, movie in enumerate(movielist)]
         btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
 
+        # Send spellcheck image
+        if isinstance(SPELL_IMG, bytes):
+            spell_img_io = BytesIO(SPELL_IMG)
+            spell_img_io.name = "spellcheck.jpg"
+            photo_to_send = spell_img_io
+        else:
+            photo_to_send = SPELL_IMG
+
         spell_check_del = await msg.reply_photo(
-        photo=SPELL_IMG,  # must be a direct image link ending with .jpg/.png
-        caption=script.CUDNT_FND.format(mv_rqst),
-        reply_markup=InlineKeyboardMarkup(btn)
+            photo=photo_to_send,
+            caption=script.CUDNT_FND.format(mv_rqst),
+            reply_markup=InlineKeyboardMarkup(btn)
         )
 
-        # 107 - Auto delete with safe check
+        # Auto-delete
         if settings.get('auto_delete', False):
             await asyncio.sleep(18000)
             await spell_check_del.delete()
 
-    # 113 - Fallback if search fails
     except Exception as e:
         logger.exception(e)
         try:
@@ -2047,19 +2119,19 @@ async def advantage_spell_chok(client, msg):
             movielist += [f"{movie.get('title')} {movie.get('year')}" for movie in movies]
 
         SPELL_CHECK[mv_id] = movielist
-        btn = [[InlineKeyboardButton(text=movie_name.strip(), callback_data=f"spol#{reqstr1}#{k}")] for k, movie_name in enumerate(movielist)]
+        btn = [[InlineKeyboardButton(text=movie_name.strip(), callback_data=f"spol#{reqstr1}#{k}")] 
+               for k, movie_name in enumerate(movielist)]
         btn.append([InlineKeyboardButton(text="Close", callback_data=f'spol#{reqstr1}#close_spellcheck')])
 
         spell_check_del = await msg.reply_photo(
-        photo=SPELL_IMG,  # must be a direct image link ending with .jpg/.png
-        caption=script.CUDNT_FND.format(mv_rqst),
-        reply_markup=InlineKeyboardMarkup(btn)
+            photo=photo_to_send,
+            caption=script.CUDNT_FND.format(mv_rqst),
+            reply_markup=InlineKeyboardMarkup(btn)
         )
 
         if settings.get('auto_delete', False):
             await asyncio.sleep(18000)
             await spell_check_del.delete()
-
 
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
