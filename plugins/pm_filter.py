@@ -1984,7 +1984,7 @@ async def advantage_spell_chok(client, msg):
         gs = list(filter(regex.match, g_s))
         gs_parsed = [
             re.sub(
-                r'\b(\-([a-zA-Z-\s])\-\simdb|(\-\s)?imdb|(\-\s)?wikipedia|\(|\)|\-|reviews|full|all|episode(s)?|film|movie|series)',
+                r'\b(\-([a-zA-Z-\s])\-\simdb|(\-\s)?imdb|(\-\s)?wikipedia|\(|\)|\-|reviews|full|all|episode(s)?|film|movie|series)'),
 
 async def advantage_spell_chok(client, msg):
     mv_id = msg.id
