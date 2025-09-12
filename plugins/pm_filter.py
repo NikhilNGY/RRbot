@@ -1550,9 +1550,7 @@ async def auto_filter(client, msg, spoll=False):
             settings = await get_settings(message.chat.id)
             if not files:
                 await m.delete()
-                    # Removed spell check function call
-                    # You can optionally send a message here or just return
-                    return
+                return
         else:
             return
     else:
