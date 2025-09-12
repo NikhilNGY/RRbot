@@ -48,7 +48,7 @@ async def start(client, message):
             disable_web_page_preview=True
         )
 
-        await asyncio.sleep(2)  # Wait a bit before logging
+        await asyncio.sleep(6000)  # Wait a bit before logging
 
         # Check if group already in DB
         if not await db.get_chat(message.chat.id):
