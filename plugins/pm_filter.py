@@ -1398,20 +1398,17 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.message.edit_reply_markup(reply_markup)
     await query.answer(MSG_ALRT)
 
-    
 async def auto_filter(client, msg, spoll=False):
     curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
-    # reqstr1 = msg.from_user.id if msg.from_user else 0
-    # reqstr = await client.get_users(reqstr1)
     
     if not spoll:
         message = msg
-        if message.text.startswith("/"): return  # ignore commands
-        if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+        if message.text.startswith("/"): return
+        if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
             return
         if len(message.text) < 100:
             search = message.text
-            m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
+            m = await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
             search = search.lower()
             find = search.split(" ")
             search = ""
@@ -1419,30 +1416,33 @@ async def auto_filter(client, msg, spoll=False):
             for x in find:
                 if x in removes:
                     continue
-                else:
-                    search = search + x + " "
+                search += x + " "
             search = re.sub(r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)", "", search, flags=re.IGNORECASE)
             search = re.sub(r"\s+", " ", search).strip()
-            search = search.replace("-", " ")
-            search = search.replace(":", "")
+            search = search.replace("-", " ").replace(":", "")
+            
             files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
             settings = await get_settings(message.chat.id)
             if not files:
                 await m.delete()
                 return
-        else:
-            return
+            
+            pre = 'filep' if settings.get('file_secure') else 'file'
+            key = f"{message.chat.id}-{message.id}"
+            FRESH[key] = search
+            temp.GETALL[key] = files
+
     else:
         message = msg.message.reply_to_message  # msg will be callback query
         search, files, offset, total_results = spoll
         m = await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
         settings = await get_settings(message.chat.id)
         await msg.message.delete()
-
-pre = 'filep' if settings['file_secure'] else 'file'
-key = f"{message.chat.id}-{message.id}"
-FRESH[key] = search
-temp.GETALL[key] = files
+        
+        pre = 'filep' if settings.get('file_secure') else 'file'
+        key = f"{message.chat.id}-{message.id}"
+        FRESH[key] = search
+        temp.GETALL[key] = files
 
 async def build_buttons(message, settings, files, key, pre, total_results, offset, MAX_B_TN):
     btn = []
