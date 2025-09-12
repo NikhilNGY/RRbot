@@ -1468,29 +1468,66 @@ else:
         btn = []
         btn.insert(0, 
             [
-                InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url=f"https://t.me/KR_Picture")
+                 InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url="https://t.me/KR_Picture")
             ]
         )
-        
+
     if offset != "":
         req = message.from_user.id if message.from_user else 0
+
         try:
-            if settings['max_btn']:
+            if settings.get('max_btn'):  # Safer key access using .get()
                 btn.append(
-                    [InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"), InlineKeyboardButton(text=f"1/{math.ceil(int(total_results)/8)}",callback_data="pages"), InlineKeyboardButton(text="𝐍𝐄𝐗𝐓 ➪",callback_data=f"next_{req}_{key}_{offset}")]
+                    [
+                        InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
+                        InlineKeyboardButton(
+                            text=f"1/{math.ceil(int(total_results)/8)}",
+                            callback_data="pages"
+                        ),
+                        InlineKeyboardButton(
+                            text="𝐍𝐄𝐗𝐓 ➪",
+                            callback_data=f"next_{req}_{key}_{offset}"
+                        )
+                    ]
                 )
             else:
                 btn.append(
-                    [InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"), InlineKeyboardButton(text=f"1/{math.ceil(int(total_results)/int(MAX_B_TN))}",callback_data="pages"), InlineKeyboardButton(text="𝐍𝐄𝐗𝐓 ➪",callback_data=f"next_{req}_{key}_{offset}")]
+                    [
+                        InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
+                        InlineKeyboardButton(
+                            text=f"1/{math.ceil(int(total_results)/int(MAX_B_TN))}",
+                            callback_data="pages"
+                        ),
+                        InlineKeyboardButton(
+                            text="𝐍𝐄𝐗𝐓 ➪",
+                            callback_data=f"next_{req}_{key}_{offset}"
+                        )
+                    ]
                 )
         except KeyError:
+            # Ensure we're inside an async function to allow 'await'
             await save_group_settings(message.chat.id, 'max_btn', True)
             btn.append(
-                [InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"), InlineKeyboardButton(text=f"1/{math.ceil(int(total_results)/8)}",callback_data="pages"), InlineKeyboardButton(text="𝐍𝐄𝐗𝐓 ➪",callback_data=f"next_{req}_{key}_{offset}")]
+                [
+                    InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
+                    InlineKeyboardButton(
+                        text=f"1/{math.ceil(int(total_results)/8)}",
+                        callback_data="pages"
+                    ),
+                    InlineKeyboardButton(
+                        text="𝐍𝐄𝐗𝐓 ➪",
+                        callback_data=f"next_{req}_{key}_{offset}"
+                    )
+                ]
             )
     else:
         btn.append(
-            [InlineKeyboardButton(text="•  Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ 2 •",url=f"https://t.me/+zqPEZQq4O3s0NDg1")]
+            [
+                InlineKeyboardButton(
+                    text="•  Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ 2 •",
+                    url="https://t.me/+zqPEZQq4O3s0NDg1"
+                )
+            ]
         )
     imdb = await get_poster(search, file=(files[0]).file_name) if settings["imdb"] else None
     cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
