@@ -1505,21 +1505,21 @@ else:
                     ]
                 )
         except KeyError:
-            # Ensure we're inside an async function to allow 'await'
+            # We're inside an async function, so 'await' works correctly
             await save_group_settings(message.chat.id, 'max_btn', True)
-            btn.append(
-                [
-                    InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
-                    InlineKeyboardButton(
-                        text=f"1/{math.ceil(int(total_results)/8)}",
-                        callback_data="pages"
-                    ),
-                    InlineKeyboardButton(
-                        text="𝐍𝐄𝐗𝐓 ➪",
-                        callback_data=f"next_{req}_{key}_{offset}"
-                    )
-                ]
-            )
+        btn.append(
+            [
+                InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
+                InlineKeyboardButton(
+                    text=f"1/{math.ceil(int(total_results)/8)}",
+                    callback_data="pages"
+                ),
+                InlineKeyboardButton(
+                    text="𝐍𝐄𝐗𝐓 ➪",
+                    callback_data=f"next_{req}_{key}_{offset}"
+                )
+            ]
+        )
     else:
         btn.append(
             [
@@ -1529,7 +1529,9 @@ else:
                 )
             ]
         )
-     return btn
+
+    return btn  # ✅ Correct indentation: outside try-except-else block
+ 
     imdb = await get_poster(search, file=(files[0]).file_name) if settings["imdb"] else None
     cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
     time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - timedelta(hours=curr_time.hour, minutes=curr_time.minute, seconds=(curr_time.second+(curr_time.microsecond/1000000)))
