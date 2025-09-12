@@ -260,7 +260,7 @@ async def start(client, message):
                 ]
             )
         )
-        await asyncio.sleep(1200)
+        await asyncio.sleep(6000)
         await k.edit("<b>Your message is successfully deleted!!!</b>")
         return
         
@@ -281,7 +281,7 @@ async def start(client, message):
                 ]
             )
         )
-        await asyncio.sleep(1200)
+        await asyncio.sleep(6000)
         await k.edit("<b>Your message is successfully deleted!!!</b>")
         return
         
@@ -333,7 +333,7 @@ async def start(client, message):
             )
             filesarr.append(msg)
         k = await client.send_message(chat_id = message.from_user.id, text=f"<b><u>🔴 IMPORTANT 🔴</u></b>\n\nThis Movie Files/Videos will be deleted in <b><u>20 mins</u><i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this ALL Files/Videos to Someone and Start Download there</i></b>\n\n<b><u>🔴 IMPORTANT 🔴</u></b>")
-        await asyncio.sleep(1200)
+        await asyncio.sleep(6000)
         for x in filesarr:
             await x.delete()
         await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
@@ -360,7 +360,7 @@ async def start(client, message):
                     ]
                 )
             )
-            await asyncio.sleep(1200)
+            await asyncio.sleep(6000)
             await k.edit("<b>Your message is successfully deleted!!!</b>")
             return
     user = message.from_user.id
@@ -453,7 +453,7 @@ async def start(client, message):
         InlineKeyboardButton("Get File Again", callback_data=f'delfile#{file_id}')
     ]]
     k = await msg.reply("<b><u>🔴 IMPORTANT 🔴</u></b>\n\nThis Movie File/Video will be deleted in <b><u>20 mins</u><i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to Someone and Start Download there</i></b>\n\n<b><u>🔴 IMPORTANT 🔴</u></b>",quote=True)
-    await asyncio.sleep(1200)
+    await asyncio.sleep(6000)
     await msg.delete()
     await k.edit_text("<b>Your File/Video is successfully deleted!!!\n\nClick below button to get your deleted file 👇</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
