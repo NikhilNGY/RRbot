@@ -1435,14 +1435,20 @@ async def auto_filter(client, msg, spoll=False):
     else:
         message = msg.message.reply_to_message  # msg will be callback query
         search, files, offset, total_results = spoll
-        m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
+        m = await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
         settings = await get_settings(message.chat.id)
         await msg.message.delete()
-    pre = 'filep' if settings['file_secure'] else 'file'
-    key = f"{message.chat.id}-{message.id}"
-    FRESH[key] = search
-    temp.GETALL[key] = files
+
+pre = 'filep' if settings['file_secure'] else 'file'
+key = f"{message.chat.id}-{message.id}"
+FRESH[key] = search
+temp.GETALL[key] = files
+
+# Safely check before accessing from_user.id
+if message.from_user and message.chat:
     temp.SHORT[message.from_user.id] = message.chat.id
+else:
+    print(f"[Warning] message.from_user or message.chat is None. Skipping temp.SHORT update. key={key}")
     if settings["button"]:
         btn = [
             [
