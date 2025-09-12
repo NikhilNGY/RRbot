@@ -1444,41 +1444,43 @@ key = f"{message.chat.id}-{message.id}"
 FRESH[key] = search
 temp.GETALL[key] = files
 
-# Safely check before accessing from_user.id
-if message.from_user and message.chat:
-    temp.SHORT[message.from_user.id] = message.chat.id
-else:
-    print(f"[Warning] message.from_user or message.chat is None. Skipping temp.SHORT update. key={key}")
-    if settings["button"]:
-        btn = [
-            [
-                InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", callback_data=f'{pre}#{file.file_id}'
-                ),
-            ]
-            for file in files
-        ]
-        btn.insert(0, 
-            [
-                InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url=f"https://t.me/KR_Picture")
-            ]
-        )
-        
+async def build_buttons(message, settings, files, key, pre, total_results, offset, MAX_B_TN):
+    btn = []
+    
+    if message.from_user and message.chat:
+        temp.SHORT[message.from_user.id] = message.chat.id
     else:
-        btn = []
-        btn.insert(0, 
-            [
-                 InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url="https://t.me/KR_Picture")
+        print(f"[Warning] message.from_user or message.chat is None. Skipping temp.SHORT update. key={key}")
+
+        if settings.get("button"):
+            btn = [
+                [
+                    InlineKeyboardButton(
+                        text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", 
+                        callback_data=f'{pre}#{file.file_id}'
+                    ),
+                ]
+                for file in files
             ]
-        )
+            btn.insert(0, 
+                [
+                    InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url="https://t.me/KR_Picture")
+                ]
+            )
+        else:
+            btn = []
+            btn.insert(0, 
+                [
+                    InlineKeyboardButton("• Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ •", url="https://t.me/KR_Picture")
+                ]
+            )
 
-    if offset != "":
-        req = message.from_user.id if message.from_user else 0
+        if offset != "":
+            req = message.from_user.id if message.from_user else 0
 
-        try:
-            if settings.get('max_btn'):  # Safer key access using .get()
-                btn.append(
-                    [
+            try:
+                if settings.get('max_btn'):
+                    btn.append([
                         InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
                         InlineKeyboardButton(
                             text=f"1/{math.ceil(int(total_results)/8)}",
@@ -1488,11 +1490,9 @@ else:
                             text="𝐍𝐄𝐗𝐓 ➪",
                             callback_data=f"next_{req}_{key}_{offset}"
                         )
-                    ]
-                )
-            else:
-                btn.append(
-                    [
+                    ])
+                else:
+                    btn.append([
                         InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
                         InlineKeyboardButton(
                             text=f"1/{math.ceil(int(total_results)/int(MAX_B_TN))}",
@@ -1502,35 +1502,31 @@ else:
                             text="𝐍𝐄𝐗𝐓 ➪",
                             callback_data=f"next_{req}_{key}_{offset}"
                         )
-                    ]
-                )
-        except KeyError:
-            # We're inside an async function, so 'await' works correctly
-            await save_group_settings(message.chat.id, 'max_btn', True)
-        btn.append(
-            [
-                InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
-                InlineKeyboardButton(
-                    text=f"1/{math.ceil(int(total_results)/8)}",
-                    callback_data="pages"
-                ),
-                InlineKeyboardButton(
-                    text="𝐍𝐄𝐗𝐓 ➪",
-                    callback_data=f"next_{req}_{key}_{offset}"
-                )
-            ]
-        )
-    else:
-        btn.append(
-            [
+                    ])
+            except KeyError:
+                # Correctly await inside async function
+                await save_group_settings(message.chat.id, 'max_btn', True)
+
+                btn.append([
+                    InlineKeyboardButton("𝐏𝐀𝐆𝐄", callback_data="pages"),
+                    InlineKeyboardButton(
+                        text=f"1/{math.ceil(int(total_results)/8)}",
+                        callback_data="pages"
+                    ),
+                    InlineKeyboardButton(
+                        text="𝐍𝐄𝐗𝐓 ➪",
+                        callback_data=f"next_{req}_{key}_{offset}"
+                    )
+                ])
+        else:
+            btn.append([
                 InlineKeyboardButton(
                     text="•  Bᴀᴄᴋᴜᴘ Cʜᴀɴɴᴇʟ 2 •",
                     url="https://t.me/+zqPEZQq4O3s0NDg1"
                 )
-            ]
-        )
+            ])
 
-    return btn  # ✅ Correct indentation: outside try-except-else block
+    return btn
  
     imdb = await get_poster(search, file=(files[0]).file_name) if settings["imdb"] else None
     cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
